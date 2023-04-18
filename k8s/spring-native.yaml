@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-native
+  namespace: backend-services
+  labels:
+    app: spring-native
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spring-native
+  template:
+    metadata:
+      labels:
+        app: spring-native
+    spec:
+      containers:
+        - name: spring-native
+          image: spring-native:0.0.1-SNAPSHOT
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Never #we want to pull the image locally
+        - name: postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-native
+  namespace: backend-services
+spec:
+  ports:
+    - protocol: TCP
+      name: spring-native
+      port: 8080
+      targetPort: 8080
+    - protocol: TCP
+      name: postgres
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: spring-native
+  type: ClusterIP
